@@ -67,14 +67,20 @@ class NotifyDialog extends ComponentDialog {
         const done = choice.value === this.doneOption;
 
         if (!done) {
-            // If they chose a company, add it to the list.
+            // If they chose a notification, add it to the list.
             list.push(choice.value);
         }
 
         if (done || list.length > 1) {
             // If they're done, exit and return their list.
             return await stepContext.next(list);
-        } else {
+        }
+        else if (done && list.length == 0){
+            // If no option is selected exit.
+            await stepContext.context.sendActivity('No options selected, notification registration canceled');
+            return await stepContext.endDialog('NOTIFY_DIALOG');
+        } 
+        else {
             // Otherwise, repeat this dialog, passing in the list from this iteration.
             return await stepContext.replaceDialog('NOTIFY_DIALOG', list);
         }
@@ -98,14 +104,13 @@ class NotifyDialog extends ComponentDialog {
         //If yes
         if (stepContext.result){
             await stepContext.context.sendActivity('Your email ' + stepContext.values.notifyInfo.email + ' has been sucessfully registered to receive notifications.');
-            await stepContext.context.sendActivity('You will now receive notfications about ' + (stepContext.values.notifyInfo.notifySelected.length === 0 ? 'no companies' : stepContext.values.notifyInfo.notifySelected.join(' and ')) + '.');
+            await stepContext.context.sendActivity('You will now receive notfications about ' + (stepContext.values.notifyInfo.notifySelected.length === 0 ? 'No notifications selected' : stepContext.values.notifyInfo.notifySelected.join(' and ')) + '.');
             return await stepContext.endDialog('NOTIFY_DIALOG');
         }
         else {
             stepContext.context.sendActivity('Notification registration canceled')
             return await stepContext.endDialog('NOTIFY_DIALOG');
         }
-        
     }
 }
 

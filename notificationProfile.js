@@ -2,7 +2,7 @@ class NotificationProfile {
     constructor(email) {
         this.email = email;
 
-        // The list of companies the user wants to review.
+        // The list of selected notifications
         this.notifySelected = [];
     }
 }

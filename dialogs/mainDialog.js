@@ -70,9 +70,7 @@ class MainDialog extends ComponentDialog {
                 await step.context.sendActivity('No QnA Maker answers were found.');
             }
         }
-        else {
-            return await step.next();
-        }
+        
         return await step.next();
     }
 
@@ -84,7 +82,6 @@ class MainDialog extends ComponentDialog {
         else {
             return await step.beginDialog('NOTIFY_DIALOG');
         }
-
     }
 
     async supportStep(step) {
@@ -95,7 +92,6 @@ class MainDialog extends ComponentDialog {
         else {
             return await step.beginDialog('SUPPORT_DIALOG');
         }
-
     }
 
     async loopStep(step) {
