@@ -1,4 +1,5 @@
 const { QnAMaker } = require('botbuilder-ai');
+const { QnaDialog } = require('./qnaDialog');
 const { NotifyDialog } = require('./notifyDialog');
 const { SupportDialog } = require('./supportDialog');
 const { ComponentDialog, WaterfallDialog, TextPrompt, DialogSet, DialogTurnStatus } = require('botbuilder-dialogs');
@@ -30,13 +31,13 @@ class MainDialog extends ComponentDialog {
         this.addDialog(new TextPrompt(TEXT_PROMPT));
         this.addDialog(new NotifyDialog());
         this.addDialog(new SupportDialog());
+        this.addDialog(new QnaDialog());
 
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
-            this.listenStep.bind(this),
             this.qnaStep.bind(this),
             this.notifyStep.bind(this),
             this.supportStep.bind(this),
-            this.loopStep.bind(this)
+            this.endStep.bind(this)
         ]));
 
         this.initialDialogId = WATERFALL_DIALOG;
@@ -53,25 +54,15 @@ class MainDialog extends ComponentDialog {
         }
     }
 
-    async listenStep(step) {
-        return await step.prompt(TEXT_PROMPT, 'You can start asking me any question about MacroKiosk! or enter "support" so I could notify a support agent for your problem. You can also enter "notify" to subscribe to our notification service.');
-    }
-
     async qnaStep(step) {
-        if (step.result != 'notify' && step.result != 'support') {
-            const qnaResults = await this.qnaMaker.getAnswers(step.context);
-
-            // If an answer was received from QnA Maker, send the answer back to the user.
-            if (qnaResults[0]) {
-                await step.context.sendActivity(qnaResults[0].answer);
-
-                // If no answers were returned from QnA Maker, reply with help.
-            } else {
-                await step.context.sendActivity('No QnA Maker answers were found.');
-            }
+        await step.context.sendActivity('You can start asking me any question about MacroKiosk! or enter "support" so I could notify a support agent for your problem. You can also enter "notify" to subscribe to our notification service.');
+        if (step.context.activity.text != 'notify' && step.context.activity.text != 'support') {
+            return await step.beginDialog('QNA_DIALOG');
         }
-        
-        return await step.next();
+
+        else {
+            return await step.next();
+        }
     }
 
     async notifyStep(step) {
@@ -94,8 +85,8 @@ class MainDialog extends ComponentDialog {
         }
     }
 
-    async loopStep(step) {
-        return await step.replaceDialog('MAIN_DIALOG');
+    async endStep(step) {
+        return await step.endDialog('MAIN_DIALOG');
     }
 
 }
