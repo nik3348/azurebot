@@ -68,14 +68,10 @@ class QnABot extends ActivityHandler {
 
     addConversationReference(activity) {
         const conversationReference = TurnContext.getConversationReference(activity);
-        const cid = {
-            id : conversationReference.conversation.id
-        }
         const cRef = {
-            activityId : null,
             user : null,
             bot : null,
-            conversation : cid,
+            conversation : { id : conversationReference.conversation.id },
             channelId : conversationReference.channelId,
             serviceUrl : conversationReference.serviceUrl
         }
