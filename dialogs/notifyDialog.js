@@ -53,6 +53,8 @@ class NotifyDialog extends ComponentDialog {
         options.push(this.doneOption);
 
         // Prompt the user for a choice.
+        await console.log(message);
+        await console.log(options);
         return await stepContext.prompt(CHOICE_PROMPT, {
             prompt: message,
             retryPrompt: 'Please choose an option from the list.',
@@ -78,6 +80,7 @@ class NotifyDialog extends ComponentDialog {
         else if (done && list.length == 0){
             // If no option is selected exit.
             await stepContext.context.sendActivity('No options selected, notification registration canceled');
+            await console.log('No options selected, notification registration canceled');
             return await stepContext.endDialog('NOTIFY_DIALOG');
         } 
         else {
@@ -90,12 +93,15 @@ class NotifyDialog extends ComponentDialog {
         stepContext.values.notifyInfo = new NotificationProfile();
         stepContext.values.notifyInfo.notifySelected = stepContext.result || [];
 
+        await console.log(`What is your email?`);
         return await stepContext.prompt(TEXT_PROMPT, `What is your email?`);
     }
 
     async confirmStep(stepContext) {
         stepContext.values.notifyInfo.email = stepContext.result;
         await stepContext.context.sendActivity(stepContext.values.notifyInfo.email);
+
+        await console.log('Is this your email?');
         return await stepContext.prompt(CONFIRM_PROMPT, 'Is this your email?', ['yes', 'no']);
         
     }
@@ -104,11 +110,17 @@ class NotifyDialog extends ComponentDialog {
         //If yes
         if (stepContext.result){
             await stepContext.context.sendActivity('Your email ' + stepContext.values.notifyInfo.email + ' has been sucessfully registered to receive notifications.');
+            await console.log('Your email ' + stepContext.values.notifyInfo.email + ' has been sucessfully registered to receive notifications.');
+
             await stepContext.context.sendActivity('You will now receive notfications about ' + (stepContext.values.notifyInfo.notifySelected.length === 0 ? 'No notifications selected' : stepContext.values.notifyInfo.notifySelected.join(' and ')) + '.');
+            await console.log('You will now receive notfications about ' + (stepContext.values.notifyInfo.notifySelected.length === 0 ? 'No notifications selected' : stepContext.values.notifyInfo.notifySelected.join(' and ')) + '.');
+
             return await stepContext.endDialog('NOTIFY_DIALOG');
         }
         else {
-            stepContext.context.sendActivity('Notification registration canceled')
+            await stepContext.context.sendActivity('Notification registration canceled');
+            await console.log('Notification registration canceled');
+            
             return await stepContext.endDialog('NOTIFY_DIALOG');
         }
     }

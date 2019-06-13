@@ -15,6 +15,8 @@ class SupportDialog extends ComponentDialog {
     async contactStep(stepContext) {
         // Create an object in which to collect the user's information within the dialog.
         await stepContext.context.sendActivity(`Support Contacted!`);
+        await console.log(`Support Contacted!`);
+        
         return await stepContext.endDialog('SUPPORT_DIALOG');
     }
 

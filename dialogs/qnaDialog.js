@@ -46,10 +46,12 @@ class QnaDialog extends ComponentDialog {
             // If an answer was received from QnA Maker, send the answer back to the user.
             if (qnaResults[0]) {
                 await step.context.sendActivity(qnaResults[0].answer);
+                await console.log(qnaResults[0].answer);
 
                 // If no answers were returned from QnA Maker, reply with help.
             } else {
-                await step.context.sendActivity('No QnA Maker answers were found.');
+                await step.context.sendActivity('I did not understand the question, please try a different phrasing. If the problem persist type "support" to contact support');
+                await console.log('I did not understand the question, please try a different phrasing. If the problem persist type "support" to contact support');
             }
         }
         return await step.next();

@@ -49,10 +49,11 @@ class QnABot extends ActivityHandler {
         this.onMessage(async (context, next) => {
             this.logger.log('Running dialog with Message Activity.');
             this.addConversationReference(context.activity);
-
+            
+            await console.log(context.activity.text);
             // Run the Dialog with the new message Activity.
             await this.dialog.run(context, this.dialogState);
-
+            
             await next();
         });
 
