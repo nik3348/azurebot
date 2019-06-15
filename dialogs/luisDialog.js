@@ -84,7 +84,7 @@ class LuisDialog extends ComponentDialog {
 
     async loopStep(step) {
         if (step.context.activity.text != 'notify' && step.context.activity.text != 'support') {
-            return await step.replaceDialog('QNA_DIALOG');
+            return await step.replaceDialog('LUIS_DIALOG');
         }
         else {
             console.log('Qna loop end');
