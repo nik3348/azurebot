@@ -1,4 +1,4 @@
-const { QnaDialog } = require('./qnaDialog');
+const { LuisDialog } = require('./luisDialog');
 const { NotifyDialog } = require('./notifyDialog');
 const { SupportDialog } = require('./supportDialog');
 const { ComponentDialog, WaterfallDialog, TextPrompt, DialogSet, DialogTurnStatus } = require('botbuilder-dialogs');
@@ -14,10 +14,10 @@ class MainDialog extends ComponentDialog {
         this.addDialog(new TextPrompt(TEXT_PROMPT));
         this.addDialog(new NotifyDialog());
         this.addDialog(new SupportDialog());
-        this.addDialog(new QnaDialog());
+        this.addDialog(new LuisDialog());
 
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
-            this.qnaStep.bind(this),
+            this.luisStep.bind(this),
             this.notifyStep.bind(this),
             this.supportStep.bind(this),
             this.endStep.bind(this)
@@ -37,7 +37,7 @@ class MainDialog extends ComponentDialog {
         }
     }
 
-    async qnaStep(step) {
+    async luisStep(step) {
         await step.context.sendActivity('You can start asking me any question about MacroKiosk! or enter "support" so I could notify a support agent for your problem. You can also enter "notify" to subscribe to our notification service.');
         await console.log('You can start asking me any question about MacroKiosk! or enter "support" so I could notify a support agent for your problem. You can also enter "notify" to subscribe to our notification service.');
         if (step.context.activity.text != 'notify' && step.context.activity.text != 'support') {

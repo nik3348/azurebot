@@ -5,9 +5,9 @@ const { Scenario1Dialog } = require('./scenario1Dialog');
 const TEXT_PROMPT = 'TEXT_PROMPT';
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 
-class QnaDialog extends ComponentDialog {
+class LuisDialog extends ComponentDialog {
     constructor() {
-        super('QNA_DIALOG');
+        super('LUIS_DIALOG');
 
         try {
             this.recognizer = new LuisRecognizer({
@@ -88,9 +88,9 @@ class QnaDialog extends ComponentDialog {
         }
         else {
             console.log('Qna loop end');
-            return await step.endDialog('QNA_DIALOG');
+            return await step.endDialog('LUIS_DIALOG');
         }
     }
 }
 
-module.exports.QnaDialog = QnaDialog;
+module.exports.LuisDialog = LuisDialog;
