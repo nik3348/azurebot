@@ -1,12 +1,24 @@
 const { ComponentDialog, WaterfallDialog, TextPrompt } = require('botbuilder-dialogs');
-const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
-const { QnAMaker } = require('botbuilder-ai');
+const { QnAMaker , LuisRecognizer } = require('botbuilder-ai');
+const { Scenario1Dialog } = require('./scenario1Dialog');
 
 const TEXT_PROMPT = 'TEXT_PROMPT';
+const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 
 class QnaDialog extends ComponentDialog {
     constructor() {
         super('QNA_DIALOG');
+
+        try {
+            this.recognizer = new LuisRecognizer({
+                applicationId: process.env.LuisAppId,
+                endpointKey: process.env.LuisAPIKey,
+                endpoint: `https://${ process.env.LuisAPIHostName }`
+            }, {}, true);
+        
+            } catch (err) {
+                logger.warn(`LUIS Exception: ${ err } Check your LUIS configuration`);
+            }
 
         try {
             var endpointHostName = process.env.QnAEndpointHostName
@@ -25,6 +37,7 @@ class QnaDialog extends ComponentDialog {
             console.warn(`QnAMaker Exception: ${err} Check your QnAMaker configuration in .env`);
         }
 
+        this.addDialog(new Scenario1Dialog());
         this.addDialog(new TextPrompt(TEXT_PROMPT));
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
             this.listenStep.bind(this),
@@ -40,6 +53,18 @@ class QnaDialog extends ComponentDialog {
     }
 
     async qnaStep(step) {
+        // First, we use the dispatch model to determine which cognitive service (LUIS or QnA) to use.
+        const recognizerResult = await this.recognizer.recognize(step.context);
+
+        // Top intent tell us which cognitive service to use.
+        const intent = LuisRecognizer.topIntent(recognizerResult);
+        
+        await step.context.sendActivity(intent);
+
+        if (intent == "Scenario1"){
+            return await step.beginDialog('SCENARIO1_DIALOG');
+        }
+
         if (step.result != 'notify' && step.result != 'support') {
             const qnaResults = await this.qnaMaker.getAnswers(step.context);
 
@@ -66,7 +91,6 @@ class QnaDialog extends ComponentDialog {
             return await step.endDialog('QNA_DIALOG');
         }
     }
-
 }
 
 module.exports.QnaDialog = QnaDialog;

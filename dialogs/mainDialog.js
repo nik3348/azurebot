@@ -1,4 +1,3 @@
-const { QnAMaker } = require('botbuilder-ai');
 const { QnaDialog } = require('./qnaDialog');
 const { NotifyDialog } = require('./notifyDialog');
 const { SupportDialog } = require('./supportDialog');
@@ -11,22 +10,6 @@ class MainDialog extends ComponentDialog {
     constructor(userState, logger) {
         super('MAIN_DIALOG');
 
-        try {
-            var endpointHostName = process.env.QnAEndpointHostName
-            if (!endpointHostName.startsWith('https://')) {
-                endpointHostName = 'https://' + endpointHostName;
-            }
-
-            if (!endpointHostName.endsWith('/qnamaker')) {
-                endpointHostName = endpointHostName + '/qnamaker';
-            } this.qnaMaker = new QnAMaker({
-                knowledgeBaseId: process.env.QnAKnowledgebaseId,
-                endpointKey: process.env.QnAAuthKey,
-                host: endpointHostName
-            });
-        } catch (err) {
-            logger.warn(`QnAMaker Exception: ${err} Check your QnAMaker configuration in .env`);
-        }
         this.logger = logger;
         this.addDialog(new TextPrompt(TEXT_PROMPT));
         this.addDialog(new NotifyDialog());
@@ -89,7 +72,6 @@ class MainDialog extends ComponentDialog {
     async endStep(step) {
         return await step.endDialog('MAIN_DIALOG');
     }
-
 }
 
 module.exports.MainDialog = MainDialog;
