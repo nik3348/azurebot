@@ -1,6 +1,6 @@
 const { ComponentDialog, WaterfallDialog, NumberPrompt, TextPrompt, DateTimePrompt } = require('botbuilder-dialogs');
+
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
-const Recognizers = require('@microsoft/recognizers-text-suite');
 
 class Scenario1Dialog extends ComponentDialog {
     constructor() {
