@@ -38,8 +38,8 @@ class MainDialog extends ComponentDialog {
     }
 
     async luisStep(step) {
-        await step.context.sendActivity('You can start asking me any question about MacroKiosk! or enter "support" so I could notify a support agent for your problem. You can also enter "notify" to subscribe to our notification service.');
-        await console.log('You can start asking me any question about MacroKiosk! or enter "support" so I could notify a support agent for your problem. You can also enter "notify" to subscribe to our notification service.');
+        await step.context.sendActivity('Hello, You can start asking me any question about MacroKiosk! or enter "support" so I could notify a support agent for your problem. You can also enter "notify" to subscribe to our notification service.');
+        await console.log('Hello, You can start asking me any question about MacroKiosk! or enter "support" so I could notify a support agent for your problem. You can also enter "notify" to subscribe to our notification service.');
         if (step.context.activity.text != 'notify' && step.context.activity.text != 'support') {
             return await step.beginDialog('LUIS_DIALOG');
         }

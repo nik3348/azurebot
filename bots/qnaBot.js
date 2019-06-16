@@ -39,7 +39,7 @@ class QnABot extends ActivityHandler {
             const membersAdded = context.activity.membersAdded;
             for (let cnt = 0; cnt < membersAdded.length; cnt++) {
                 if (membersAdded[cnt].id !== context.activity.recipient.id) {
-                    await context.sendActivity('Welcome to the chat! I am ChatBot made to answer the questions you have about MacroKiosk. Please enter anything to begin.');
+                    await context.sendActivity('Welcome to the chat! I am ChatBot made to answer the questions you have about MacroKiosk.');
                 }
             }
 

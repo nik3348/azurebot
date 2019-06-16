@@ -62,8 +62,6 @@ class LuisDialog extends ComponentDialog {
 
         // Top intent tell us which cognitive service to use.
         const intent = LuisRecognizer.topIntent(recognizerResult);
-        
-        await step.context.sendActivity(intent);
 
         if (intent == "Scenario1"){
             return await step.beginDialog('SCENARIO1_DIALOG');
