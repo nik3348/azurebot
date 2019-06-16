@@ -1,5 +1,5 @@
 const { ComponentDialog, WaterfallDialog, TextPrompt } = require('botbuilder-dialogs');
-const { QnAMaker , LuisRecognizer } = require('botbuilder-ai');
+const { QnAMaker, LuisRecognizer } = require('botbuilder-ai');
 const { Scenario1Dialog } = require('./scenario1Dialog');
 const { Scenario3Dialog } = require('./scenario3Dialog');
 const { Scenario6Dialog } = require('./scenario6Dialog');
@@ -18,13 +18,12 @@ class LuisDialog extends ComponentDialog {
                 endpointKey: process.env.LuisAPIKey,
                 endpoint: `https://${ process.env.LuisAPIHostName }`
             }, {}, true);
-        
-            } catch (err) {
-                logger.warn(`LUIS Exception: ${ err } Check your LUIS configuration`);
-            }
+        } catch (err) {
+            logger.warn(`LUIS Exception: ${ err } Check your LUIS configuration`);
+        }
 
         try {
-            var endpointHostName = process.env.QnAEndpointHostName
+            var endpointHostName = process.env.QnAEndpointHostName;
             if (!endpointHostName.startsWith('https://')) {
                 endpointHostName = 'https://' + endpointHostName;
             }
@@ -37,7 +36,7 @@ class LuisDialog extends ComponentDialog {
                 host: endpointHostName
             });
         } catch (err) {
-            console.warn(`QnAMaker Exception: ${err} Check your QnAMaker configuration in .env`);
+            console.warn(`QnAMaker Exception: ${ err } Check your QnAMaker configuration in .env`);
         }
 
         this.addDialog(new Scenario1Dialog());
@@ -48,7 +47,7 @@ class LuisDialog extends ComponentDialog {
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
             this.listenStep.bind(this),
             this.qnaStep.bind(this),
-            this.loopStep.bind(this),
+            this.loopStep.bind(this)
         ]));
 
         this.initialDialogId = WATERFALL_DIALOG;
@@ -64,8 +63,9 @@ class LuisDialog extends ComponentDialog {
 
         // Top intent tell us which cognitive service to use.
         const intent = LuisRecognizer.topIntent(recognizerResult);
+        await step.context.sendActivity(intent);
 
-        if (intent == "Scenario1"){
+        if (intent == 'Scenario1') {
             return await step.beginDialog('SCENARIO1_DIALOG');
         }
 

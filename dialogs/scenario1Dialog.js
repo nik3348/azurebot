@@ -1,6 +1,12 @@
 const { ComponentDialog, WaterfallDialog, NumberPrompt, TextPrompt, DateTimePrompt } = require('botbuilder-dialogs');
-
+const moment = require('moment');
+const db = require('../database');
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
+// const Recognizers = require('@microsoft/recognizers-text-suite');
+
+let clientid = '';
+let phoneNo = '';
+let issueDate = '';
 
 class Scenario1Dialog extends ComponentDialog {
     constructor() {
@@ -20,45 +26,48 @@ class Scenario1Dialog extends ComponentDialog {
         this.initialDialogId = WATERFALL_DIALOG;
     }
 
-    async clientIdStep(step){
+    async clientIdStep(step) {
         return await step.prompt('TEXT_PROMPT', 'Please enter the client ID');
     }
 
-    async numberStep(step){
-        const clientid = step.result;
-        console.log(clientid);
-        const pOptions =  { prompt: 'Please provide the mobile number', retryPrompt: 'Please enter a vaild phone number, make sure there are no symbols and the number does not exceed 11!' };
+    async numberStep(step) {
+        clientid = step.result;
+        const pOptions = { prompt: 'Please provide the mobile number', retryPrompt: 'Please enter a vaild phone number, make sure there are no symbols and the number does not exceed 11!' };
         return await step.prompt('MOBILE_PROMPT', pOptions);
     }
 
     async dateStep(step) {
-        const mobNum = step.result;
-
+        phoneNo = step.result;
         return await step.prompt('DATE_TIME_PROMPT', 'Please tell us when did the issue occured?');
     }
 
-
     async contactStep(step) {
-        console.log(step.result);
-        if (step.result[0].type == 'time'){
-            const moment = require('moment');
-            console.log(moment().format('YYYY-MM-DD' + step.result[0].timex));
+        if (step.result[0].type == 'time') {
+            issueDate = moment().format('YYYY-MM-DD ' + step.result[0].value);
+        } else if (step.result[0].type == 'date') {
+            issueDate = moment().format(step.result[0].value + ' HH:mm:ss');
+        } else {
+            issueDate = step.result[0].value;
         }
-        
+
+        db.query('SELECT * FROM transaction WHERE clientId = ? AND phoneNo = ? AND date = ?', [clientid, phoneNo, issueDate], function(error, results, fields) {
+            console.log(results);
+            console.error(`\n [mysql]: ${ error }`);
+        });
+
         return await step.endDialog('SCENARIO1_DIALOG');
     }
 
-    async mobileValidator(context){
+    async mobileValidator(context) {
         let regMobNum = /[0-9]{10,11}/;
-        if(context.recognized.succeeded){
+        if (context.recognized.succeeded) {
             let result = context.recognized.value;
-            if (result.match(regMobNum)){
-            return true;
+            if (result.match(regMobNum)) {
+                return true;
             }
-        }
-        else {
+        } else {
             return false;
-        }   
+        }
     }
 }
 

@@ -54,7 +54,6 @@ class QnABot extends ActivityHandler {
             // await console.log(context.activity.text);
             // Run the Dialog with the new message Activity.
             await this.dialog.run(context, this.dialogState);
-            
             await next();
         });
 
