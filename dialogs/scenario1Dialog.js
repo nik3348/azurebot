@@ -1,4 +1,4 @@
-const { ComponentDialog, WaterfallDialog, NumberPrompt, TextPrompt } = require('botbuilder-dialogs');
+const { ComponentDialog, WaterfallDialog, NumberPrompt, TextPrompt, DateTimePrompt } = require('botbuilder-dialogs');
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 const Recognizers = require('@microsoft/recognizers-text-suite');
 
@@ -7,7 +7,9 @@ class Scenario1Dialog extends ComponentDialog {
         super('SCENARIO1_DIALOG');
 
         this.addDialog(new TextPrompt('TEXT_PROMPT'));
+        this.addDialog(new TextPrompt('MOBILE_PROMPT', this.mobileValidator));
         this.addDialog(new NumberPrompt('NUMBER_PROMPT'));
+        this.addDialog(new DateTimePrompt('DATE_TIME_PROMPT'));
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
             this.clientIdStep.bind(this),
             this.numberStep.bind(this),
@@ -25,39 +27,38 @@ class Scenario1Dialog extends ComponentDialog {
     async numberStep(step){
         const clientid = step.result;
         console.log(clientid);
-        return await step.prompt('NUMBER_PROMPT', 'Please provide the mobile number');
+        const pOptions =  { prompt: 'Please provide the mobile number', retryPrompt: 'Please enter a vaild phone number, make sure there are no symbols and the number does not exceed 11!' };
+        return await step.prompt('MOBILE_PROMPT', pOptions);
     }
 
-    async dateStep(step){
-        const mobNumber = step.result;
-        console.log(mobNumber);
-        return await step.prompt('TEXT_PROMPT', 'Please tell us when did the issue occured?');
+    async dateStep(step) {
+        const mobNum = step.result;
+
+        return await step.prompt('DATE_TIME_PROMPT', 'Please tell us when did the issue occured?');
     }
 
 
     async contactStep(step) {
-        try {
-            const results = Recognizers.recognizeDateTime(step.result, Recognizers.Culture.English);
-            const now = new Date();
-            results.forEach(result => {
-                // result.resolution is a dictionary, where the "values" entry contains the processed input.
-                result.resolution['values'].forEach(resolution => {
-                    // The processed input contains a "value" entry if it is a date-time value, or "start" and
-                    // "end" entries if it is a date-time range.
-                    const datevalue = resolution['value'] || resolution['start'];
-                    // If only time is given, assume it's for today.
-                    const datetime = resolution['type'] === 'time' ? new Date(`${ now.toLocaleDateString() } ${ datevalue }`) : new Date(datevalue);
-                    console.log(datetime.toLocaleDateString());
-                    return;
-                });
-            });
-
-
-            return await step.endDialog('SCENARIO1_DIALOG');
-        } catch (error) {
-            await step.context.sendActivity('I am sorry I dont understand the date given.');
-            return await step.endDialog('SCENARIO1_DIALOG');
+        console.log(step.result);
+        if (step.result[0].type == 'time'){
+            const moment = require('moment');
+            console.log(moment().format('YYYY-MM-DD' + step.result[0].timex));
         }
+        
+        return await step.endDialog('SCENARIO1_DIALOG');
+    }
+
+    async mobileValidator(context){
+        let regMobNum = /[0-9]{10,11}/;
+        if(context.recognized.succeeded){
+            let result = context.recognized.value;
+            if (result.match(regMobNum)){
+            return true;
+            }
+        }
+        else {
+            return false;
+        }   
     }
 }
 
