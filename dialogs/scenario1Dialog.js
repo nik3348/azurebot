@@ -74,7 +74,8 @@ class Scenario1Dialog extends ComponentDialog {
             await step.context.sendActivity('Upon investigating based on the provided number/s, we’ve seen that the TACs have been sent out to the customer with no issues. However, user might have not received the TAC due to network coverage disruption at the area where the request was made or even an issue from users device itself. \nKindly advise user to retry by following the steps below:\n* Make sure phone is in high coverage\n* Restarted phone to refresh network\n* Make sure phone inbox is not full\n* Check if any phone applications or settings that may filter our messages \n\nAlternatively, user may swap sim to another phone and retry. Kindly let us know if the issue still persists.');
             break;
         default:
-            // code block
+            await step.context.sendActivity('Status not found');
+            break;
         }
 
         return await step.endDialog('SCENARIO1_DIALOG');

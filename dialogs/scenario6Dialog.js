@@ -1,4 +1,5 @@
 const { ComponentDialog, WaterfallDialog, TextPrompt, DateTimePrompt, ConfirmPrompt } = require('botbuilder-dialogs');
+const moment = require('moment');
 
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 
@@ -26,7 +27,6 @@ class Scenario6Dialog extends ComponentDialog {
 
     async phoneNoStep(step) {
         step.values.info = [];
-
         console.log('Please provide the mobile number');
         const pOptions = { prompt: 'Please provide the mobile number', retryPrompt: 'Please enter a vaild phone number, make sure there are no symbols and the number does not exceed 11!' };
         return await step.prompt('MOBILE_PROMPT', pOptions);
@@ -42,15 +42,15 @@ class Scenario6Dialog extends ComponentDialog {
 
     async UserIdStep(step) {
         if (step.result[0].type === 'time') {
-            const moment = require('moment');
-            console.log(moment().format('YYYY-MM-DD' + step.result[0].timex));
-            step.values.info.push(moment().format('YYYY-MM-DD' + step.result[0].timex));
-            console.log(step.values.info[1]);
+            step.values.info.push(moment().format('YYYY-MM-DD ' + step.result[0].value));
+            console.log('Please enter the User ID');
+            return await step.prompt('TEXT_PROMPT', 'Please enter the User ID');
+        } else if (step.result[0].type === 'date') {
+            step.values.info.push(moment().format(step.result[0].value + ' HH:mm:ss'));
             console.log('Please enter the User ID');
             return await step.prompt('TEXT_PROMPT', 'Please enter the User ID');
         } else {
-            step.values.info.push(step.result[0].timex);
-            console.log(step.values.info[4]);
+            step.values.info.push(step.result[0].value);
             console.log('Please enter the User ID');
             return await step.prompt('TEXT_PROMPT', 'Please enter the User ID');
         }
@@ -117,7 +117,30 @@ class Scenario6Dialog extends ComponentDialog {
         // if yes
         if (step.result) {
             console.log(step.result);
-            return await step.endDialog('SCENARIO6_DIALOG');
+            const mysql = require('mysql2/promise');
+            const connection = await mysql.createConnection({
+                host: process.env.MySQLHost,
+                user: process.env.MySQLUser,
+                password: process.env.MySQLPassword,
+                database: process.env.MySQLDatabase
+            });
+            let month = (moment(step.values.info[1]).month()) + 1;
+            let year = (moment(step.values.info[1]).year());
+            console.log(year);
+            const [rows] = await connection.execute('SELECT * FROM info WHERE phoneNo = ? AND MONTH(smsDate) = ? AND YEAR(smsDate) = ?', [step.values.info[0], month, year]);
+            console.log(rows);
+            if (rows !== undefined || rows.length !== 0) {
+                await step.context.sendActivity('We were able to pull out these data for your inquiry: \n' +
+                    'MTID:' + rows[0].mtid + '\n' +
+                    'Client: ' + rows[0].client + '\n' +
+                    'Sender ID: ' + rows[0].senderId + '\n' +
+                    'MSISDN: ' + rows[0].msisdn + '\n' +
+                    'Broadcast Date: ' + rows[0].bDate + '\n' +
+                    'Broadcast Message: ' + rows[0].bMessage);
+                return await step.endDialog('SCENARIO6_DIALOG');
+            } else {
+                await step.context.sendActivity('Could not find the record! Please try again.');
+            }
         } else {
             console.log(step.result);
             step.context.sendActivity('Ok, you can still ask me any questions you may have or enter "support" if you`re encountering problems');
