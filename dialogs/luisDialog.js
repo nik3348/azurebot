@@ -1,6 +1,7 @@
 const { ComponentDialog, WaterfallDialog, TextPrompt } = require('botbuilder-dialogs');
 const { QnAMaker, LuisRecognizer } = require('botbuilder-ai');
 const { Scenario1Dialog } = require('./scenario1Dialog');
+const { Scenario2Dialog } = require('./scenario2Dialog');
 const { Scenario3Dialog } = require('./scenario3Dialog');
 const { Scenario6Dialog } = require('./scenario6Dialog');
 const { CheckStatusDialog } = require('./checkStatusDialog');
@@ -40,6 +41,7 @@ class LuisDialog extends ComponentDialog {
         }
 
         this.addDialog(new Scenario1Dialog());
+        this.addDialog(new Scenario2Dialog());
         this.addDialog(new Scenario3Dialog());
         this.addDialog(new Scenario6Dialog());
         this.addDialog(new CheckStatusDialog());
@@ -67,6 +69,8 @@ class LuisDialog extends ComponentDialog {
 
         if (intent === 'Scenario1') {
             return await step.beginDialog('SCENARIO1_DIALOG');
+        } else if (intent === 'Scenario2') {
+            return await step.beginDialog('SCENARIO2_DIALOG');
         } else if (intent === 'Scenario3') {
             return await step.beginDialog('SCENARIO3_DIALOG');
         } else if (intent === 'Scenario6') {
