@@ -19,7 +19,7 @@ class LuisDialog extends ComponentDialog {
                 endpoint: `https://${ process.env.LuisAPIHostName }`
             }, {}, true);
         } catch (err) {
-            logger.warn(`LUIS Exception: ${ err } Check your LUIS configuration`);
+            console.warn(`LUIS Exception: ${ err } Check your LUIS configuration`);
         }
 
         try {
@@ -65,23 +65,17 @@ class LuisDialog extends ComponentDialog {
         const intent = LuisRecognizer.topIntent(recognizerResult);
         await step.context.sendActivity(intent);
 
-        if (intent == 'Scenario1') {
+        if (intent === 'Scenario1') {
             return await step.beginDialog('SCENARIO1_DIALOG');
-        }
-
-        else if (intent == "Scenario3"){
+        } else if (intent === 'Scenario3') {
             return await step.beginDialog('SCENARIO3_DIALOG');
-        }
-
-        else if (intent == "Scenario6"){
+        } else if (intent === 'Scenario6') {
             return await step.beginDialog('SCENARIO6_DIALOG');
-        }
-
-        else if (intent == "checkStatus"){
+        } else if (intent === 'checkStatus') {
             return await step.beginDialog('CHECK_STATUS_DIALOG');
         }
 
-        if (step.result != 'notify' && step.result != 'support') {
+        if (step.result !== 'notify' && step.result !== 'support') {
             const qnaResults = await this.qnaMaker.getAnswers(step.context);
 
             // If an answer was received from QnA Maker, send the answer back to the user.
@@ -99,10 +93,9 @@ class LuisDialog extends ComponentDialog {
     }
 
     async loopStep(step) {
-        if (step.context.activity.text != 'notify' && step.context.activity.text != 'support') {
+        if (step.context.activity.text !== 'notify' && step.context.activity.text !== 'support') {
             return await step.replaceDialog('LUIS_DIALOG');
-        }
-        else {
+        } else {
             console.log('Qna loop end');
             return await step.endDialog('LUIS_DIALOG');
         }

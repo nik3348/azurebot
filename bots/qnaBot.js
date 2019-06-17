@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 const { ActivityHandler, TurnContext } = require('botbuilder');
-const { ConversationReference } = require('botframework-schema');
 
 class QnABot extends ActivityHandler {
     /**
@@ -68,12 +67,12 @@ class QnABot extends ActivityHandler {
     addConversationReference(activity) {
         const conversationReference = TurnContext.getConversationReference(activity);
         const cRef = {
-            user : null,
-            bot : null,
-            conversation : { id : conversationReference.conversation.id },
-            channelId : conversationReference.channelId,
-            serviceUrl : conversationReference.serviceUrl
-        }
+            user: null,
+            bot: null,
+            conversation: { id: conversationReference.conversation.id },
+            channelId: conversationReference.channelId,
+            serviceUrl: conversationReference.serviceUrl
+        };
         this.conversationReferences[conversationReference.conversation.id] = cRef;
     }
 }

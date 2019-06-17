@@ -10,34 +10,31 @@ class CheckStatusDialog extends ComponentDialog {
 
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
             this.statusIdStep.bind(this),
-            this.validationStep.bind(this),
+            this.validationStep.bind(this)
         ]));
 
         this.initialDialogId = WATERFALL_DIALOG;
     }
 
-    async statusIdStep(step){
+    async statusIdStep(step) {
         const pOptions = { prompt: 'May I know the status number?', retryPrompt: 'Please ensure than the status number follows the format RN-XXXX' };
         return await step.prompt('TEXT_PROMPT', pOptions);
     }
 
-    async validationStep(step){
-        const statusID = step.result;
-        return await step.endDialog('CHECK_STATUS_DIALOG')
+    async validationStep(step) {
+        return await step.endDialog('CHECK_STATUS_DIALOG');
     }
-    
 
-    async statusIdValidator(context){
+    async statusIdValidator(context) {
         let regstatusID = /[A-Z]{2}-[0-9]{4,10}/;
-        if(context.recognized.succeeded){
+        if (context.recognized.succeeded) {
             let result = context.recognized.value;
-            if (result.match(regstatusID)){
-            return true;
+            if (result.match(regstatusID)) {
+                return true;
             }
-        }
-        else {
+        } else {
             return false;
-        }   
+        }
     }
 }
 

@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql = require('mysql2/promise');
 const path = require('path');
 
 const ENV_FILE = path.join(__dirname, '.env');

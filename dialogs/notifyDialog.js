@@ -18,7 +18,6 @@ class NotifyDialog extends ComponentDialog {
 
         // Define the company choices for the company selection prompt.
         this.notifyOptions = ['Company Events', 'Software Updates'];
-        
         this.addDialog(new TextPrompt(TEXT_PROMPT));
         this.addDialog(new ChoicePrompt(CHOICE_PROMPT));
         this.addDialog(new ConfirmPrompt(CONFIRM_PROMPT));
@@ -76,14 +75,12 @@ class NotifyDialog extends ComponentDialog {
         if (done || list.length > 1) {
             // If they're done, exit and return their list.
             return await stepContext.next(list);
-        }
-        else if (done && list.length == 0){
+        } else if (done && list.length === 0) {
             // If no option is selected exit.
             await stepContext.context.sendActivity('No options selected, notification registration canceled');
             await console.log('No options selected, notification registration canceled');
             return await stepContext.endDialog('NOTIFY_DIALOG');
-        } 
-        else {
+        } else {
             // Otherwise, repeat this dialog, passing in the list from this iteration.
             return await stepContext.replaceDialog('NOTIFY_DIALOG', list);
         }
@@ -103,12 +100,11 @@ class NotifyDialog extends ComponentDialog {
 
         await console.log('Is this your email?');
         return await stepContext.prompt(CONFIRM_PROMPT, 'Is this your email?', ['yes', 'no']);
-        
     }
 
     async nextDialogStep(stepContext) {
-        //If yes
-        if (stepContext.result){
+        // If yes
+        if (stepContext.result) {
             await stepContext.context.sendActivity('Your email ' + stepContext.values.notifyInfo.email + ' has been sucessfully registered to receive notifications.');
             await console.log('Your email ' + stepContext.values.notifyInfo.email + ' has been sucessfully registered to receive notifications.');
 
@@ -116,11 +112,9 @@ class NotifyDialog extends ComponentDialog {
             await console.log('You will now receive notfications about ' + (stepContext.values.notifyInfo.notifySelected.length === 0 ? 'No notifications selected' : stepContext.values.notifyInfo.notifySelected.join(' and ')) + '.');
 
             return await stepContext.endDialog('NOTIFY_DIALOG');
-        }
-        else {
+        } else {
             await stepContext.context.sendActivity('Notification registration canceled');
             await console.log('Notification registration canceled');
-            
             return await stepContext.endDialog('NOTIFY_DIALOG');
         }
     }

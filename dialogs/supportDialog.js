@@ -6,7 +6,7 @@ class SupportDialog extends ComponentDialog {
         super('SUPPORT_DIALOG');
 
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
-            this.contactStep.bind(this),
+            this.contactStep.bind(this)
         ]));
 
         this.initialDialogId = WATERFALL_DIALOG;
@@ -16,10 +16,9 @@ class SupportDialog extends ComponentDialog {
         // Create an object in which to collect the user's information within the dialog.
         await stepContext.context.sendActivity(`Support Contacted!`);
         await console.log(`Support Contacted!`);
-        
+
         return await stepContext.endDialog('SUPPORT_DIALOG');
     }
-
 }
 
 module.exports.SupportDialog = SupportDialog;
