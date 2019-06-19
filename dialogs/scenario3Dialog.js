@@ -31,36 +31,27 @@ class Scenario3Dialog extends ComponentDialog {
     async nameStep(step) {
         step.values.info = [];
 
-        console.log('Please enter the customer name');
         return await step.prompt('TEXT_PROMPT', 'Please enter the customer name');
     }
 
     async nricStep(step) {
-        console.log(step.result);
         step.values.info.push(step.result);
-        console.log('Please enter the customer NRIC or Passport');
         return await step.prompt('TEXT_PROMPT', 'Please enter the customer NRIC or Passport');
     }
 
     async mobileStep(step) {
-        console.log(step.result);
         step.values.info.push(step.result);
-        console.log('Please provide the mobile number');
         const pOptions = { prompt: 'Please provide the mobile number', retryPrompt: 'Please enter a vaild phone number, make sure there are no symbols and the number does not exceed 11!' };
         return await step.prompt('MOBILE_PROMPT', pOptions);
     }
 
     async snStep(step) {
-        console.log(step.result);
         step.values.info.push(step.result);
-        console.log('Please enter the S/N');
         return await step.prompt('TEXT_PROMPT', 'Please enter the S/N');
     }
 
     async dateStep(step) {
-        console.log(step.result);
         step.values.info.push(step.result);
-        console.log('Please tell us when did the issue occured?');
         const pOptions = { prompt: 'Please tell us when did the issue occured?', retryPrompt: 'Please enter a vaild date\n Examples: \nToday, around 9 AM\n17-Apr-2019, 16:03:09 PM\n17/04/2019 4:03 PM\nYesterday around 6 in the evening' };
         return await step.prompt('DATE_TIME_PROMPT', pOptions);
     }
@@ -68,48 +59,37 @@ class Scenario3Dialog extends ComponentDialog {
     async tacOtpStep(step) {
         if (step.result[0].type === 'time') {
             step.values.info.push(moment().format('YYYY-MM-DD ' + step.result[0].value));
-            console.log('Please enter the TAC/OTP clarification number for Client A');
             return await step.prompt('TEXT_PROMPT', 'Please enter the TAC/OTP clarification number for Client A');
         } else if (step.result[0].type === 'date') {
             step.values.info.push(moment().format(step.result[0].value + ' HH:mm:ss'));
-            console.log('Please enter the TAC/OTP clarification number for Client A');
             return await step.prompt('TEXT_PROMPT', 'Please enter the TAC/OTP clarification number for Client A');
         } else {
             step.values.info.push(step.result[0].value);
-            console.log('Please enter the TAC/OTP clarification number for Client A');
             return await step.prompt('TEXT_PROMPT', 'Please enter the TAC/OTP clarification number for Client A');
         }
     }
 
     async tacOtp2Step(step) {
-        console.log(step.result);
         step.values.info.push(step.result);
-        console.log('Please enter the TAC/OTP clarification number for Client B');
         return await step.prompt('TEXT_PROMPT', 'Please enter the TAC/OTP clarification number for Client B');
     }
 
     async confirmAltStep(step) {
-        console.log(step.result);
         step.values.info.push(step.result);
-        console.log('Is there an alternative number?');
         return await step.prompt('CONFIRM_PROMPT', 'Is there an alternative number?', ['yes', 'no']);
     }
 
     async altMobileStep(step) {
         if (step.result) {
-            console.log(step.result);
-            console.log('Please provide the alt mobile number');
             const pOptions = { prompt: 'Please provide the alt mobile number', retryPrompt: 'Please enter a vaild phone number, make sure there are no symbols and the number does not exceed 11!' };
             return await step.prompt('MOBILE_PROMPT', pOptions);
         } else {
-            console.log(step.result);
             return await step.next('NaN');
         }
     }
 
     async confirmStep(step) {
         step.values.info.push(step.result);
-        console.log(step.values.info);
         await step.context.sendActivity('Here is what I have collected so far:\n' +
         'Name: ' + step.values.info[0] + '\n' +
         'NRIC/Passport: ' + step.values.info[1] + '\n' +
@@ -120,25 +100,12 @@ class Scenario3Dialog extends ComponentDialog {
         'TAC/OTP clarification (client B): ' + step.values.info[6] + '\n' +
         'Alt. No: ' + step.values.info[7]);
 
-        // Logging for transcript
-        console.log('Here is what I have collected so far:\n' +
-        'Name: ' + step.values.info[0] + '\n' +
-        'NRIC/Passport: ' + step.values.info[1] + '\n' +
-        'Mobile No: ' + step.values.info[2] + '\n' +
-        'S/N: ' + step.values.info[3] + '\n' +
-        'Date and Time: ' + step.values.info[4] + '\n' +
-        'TAC/OTP clarification (client A): ' + step.values.info[5] + '\n' +
-        'TAC/OTP clarification (client B): ' + step.values.info[6] + '\n' +
-        'Alt. No: ' + step.values.info[7]);
-
-        console.log('Would you like me to check the database with the details provided?');
         return await step.prompt('CONFIRM_PROMPT', 'Would you like me to check the database with the details provided?', ['yes', 'no']);
     }
 
     async validationStep(step) {
-        // if yes
+        let telco = '';
         if (step.result) {
-            console.log(step.result);
             const mysql = require('mysql2/promise');
             const connection = await mysql.createConnection({
                 host: process.env.MySQLHost,
@@ -147,10 +114,12 @@ class Scenario3Dialog extends ComponentDialog {
                 database: process.env.MySQLDatabase
             });
             const [rows] = await connection.execute('SELECT telco FROM transaction WHERE phoneNo = ? AND date = ?', [step.values.info[2], step.values.info[4]]);
-            const telco = rows[0].telco;
-            if (rows !== undefined || rows.length !== 0) {
-                const [rows] = await connection.execute('UPDATE transaction SET telco = "TELCO-A" WHERE phoneNo = ? AND date = ?', [step.values.info[2], step.values.info[4]]);
-                console.log(rows);
+            if (rows.length !== 0) {
+                telco = rows[0].telco;
+            }
+            if (rows.length !== 0) {
+                const [uRows] = await connection.execute('UPDATE transaction SET telco = "TELCO-A" WHERE phoneNo = ? AND date = ?', [step.values.info[2], step.values.info[4]]);
+                console.log(uRows);
                 await step.context.sendActivity('Upon checking we did observe that the number provided was pointing to ' + telco + ' as its telco provider. However, we have now updated the provider to TELCO-A. Kindly advise the customer to retry.');
             } else {
                 await step.context.sendActivity('Could not find the record! Please try again.');
@@ -158,9 +127,7 @@ class Scenario3Dialog extends ComponentDialog {
 
             return await step.endDialog('SCENARIO3_DIALOG');
         } else {
-            console.log(step.result);
             step.context.sendActivity('Ok, you can still ask me any questions you may have or enter "support" if you`re encountering problems');
-            console.log('Ok, you can still ask me any questions you may have or enter "support" if you`re encountering problems');
             return await step.endDialog('SCENARIO3_DIALOG');
         }
     }

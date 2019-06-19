@@ -26,29 +26,22 @@ class Scenario2Dialog extends ComponentDialog {
 
     async nameStep(step) {
         step.values.info = [];
-        console.log('Please enter the customer name');
         return await step.prompt('TEXT_PROMPT', 'Please enter the customer name');
     }
 
     async mobileStep(step) {
-        console.log(step.result);
         step.values.info.push(step.result);
-        console.log('Please provide the mobile number');
         const pOptions = { prompt: 'Please provide the mobile number', retryPrompt: 'Please enter a vaild phone number, make sure there are no symbols and the number does not exceed 11!' };
         return await step.prompt('MOBILE_PROMPT', pOptions);
     }
 
     async snStep(step) {
-        console.log(step.result);
         step.values.info.push(step.result);
-        console.log('Please enter the S/N');
         return await step.prompt('TEXT_PROMPT', 'Please enter the S/N');
     }
 
     async dateStep(step) {
-        console.log(step.result);
         step.values.info.push(step.result);
-        console.log('Please tell us when did the issue occured?');
         const pOptions = { prompt: 'Please tell us when did the issue occured?', retryPrompt: 'Please enter a vaild date\n Examples: \nToday, around 9 AM\n17-Apr-2019, 16:03:09 PM\n17/04/2019 4:03 PM\nYesterday around 6 in the evening' };
         return await step.prompt('DATE_TIME_PROMPT', pOptions);
     }
@@ -56,22 +49,18 @@ class Scenario2Dialog extends ComponentDialog {
     async tacOtpStep(step) {
         if (step.result[0].type === 'time') {
             step.values.info.push(moment().format('YYYY-MM-DD ' + step.result[0].value));
-            console.log('Please enter the TAC/OTP clarification');
             return await step.prompt('TEXT_PROMPT', 'Please enter the TAC/OTP clarification');
         } else if (step.result[0].type === 'date') {
             step.values.info.push(moment().format(step.result[0].value + ' HH:mm:ss'));
-            console.log('Please enter the TAC/OTP clarification');
             return await step.prompt('TEXT_PROMPT', 'Please enter the TAC/OTP clarification');
         } else {
             step.values.info.push(step.result[0].value);
-            console.log('Please enter the TAC/OTP clarification');
             return await step.prompt('TEXT_PROMPT', 'Please enter the TAC/OTP clarification');
         }
     }
 
     async confirmStep(step) {
         step.values.info.push(step.result);
-        console.log(step.values.info);
         await step.context.sendActivity('Here is what I have collected so far:\n' +
         'Name: ' + step.values.info[0] + '\n' +
         'Mobile No: ' + step.values.info[1] + '\n' +
@@ -79,28 +68,30 @@ class Scenario2Dialog extends ComponentDialog {
         'Date and Time: ' + step.values.info[3] + '\n' +
         'TAC/OTP clarification : ' + step.values.info[4]);
 
-        // Logging for transcript
-        console.log('Here is what I have collected so far:\n' +
-        'Name: ' + step.values.info[0] + '\n' +
-        'Mobile No: ' + step.values.info[1] + '\n' +
-        'Sim S/N: ' + step.values.info[2] + '\n' +
-        'Date and Time: ' + step.values.info[3] + '\n' +
-        'TAC/OTP clarification : ' + step.values.info[4]);
-
-        console.log('Would you like me to check the database with the details provided?');
         return await step.prompt('CONFIRM_PROMPT', 'Would you like me to check the database with the details provided?', ['yes', 'no']);
     }
 
     async validationStep(step) {
-        // if yes
         if (step.result) {
-            console.log(step.result);
-
-            return await step.endDialog('SCENARIO2_DIALOG');
+            await step.context.sendActivity('Thank you for providing this information. Let me do some checking.');
+            const mysql = require('mysql2/promise');
+            const connection = await mysql.createConnection({
+                host: process.env.MySQLHost,
+                user: process.env.MySQLUser,
+                password: process.env.MySQLPassword,
+                database: process.env.MySQLDatabase
+            });
+            const [rows] = await connection.execute('SELECT * FROM transaction WHERE phoneNo = ?', [step.values.info[1]]);
+            if (rows.length !== 0) {
+                const [rows] = await connection.execute('UPDATE transaction SET telco = "TELCO-B" WHERE phoneNo = ?', [step.values.info[2]]);
+                console.log(rows);
+                await step.context.sendActivity('We have now updated the number provided to TELCO-B. Kindly advise user to restart the device and retry requesting.');
+                return await step.endDialog('SCENARIO2_DIALOG');
+            } else {
+                await step.context.sendActivity('Could not find the record! Please try again.');
+            }
         } else {
-            console.log(step.result);
             step.context.sendActivity('Ok, you can still ask me any questions you may have or enter "support" if you`re encountering problems');
-            console.log('Ok, you can still ask me any questions you may have or enter "support" if you`re encountering problems');
             return await step.endDialog('SCENARIO2_DIALOG');
         }
     }

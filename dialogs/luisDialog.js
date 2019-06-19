@@ -85,12 +85,10 @@ class LuisDialog extends ComponentDialog {
             // If an answer was received from QnA Maker, send the answer back to the user.
             if (qnaResults[0]) {
                 await step.context.sendActivity(qnaResults[0].answer);
-                await console.log(qnaResults[0].answer);
 
                 // If no answers were returned from QnA Maker, reply with help.
             } else {
                 await step.context.sendActivity('I did not understand the question, please try a different phrasing. If the problem persist type "support" to contact support');
-                await console.log('I did not understand the question, please try a different phrasing. If the problem persist type "support" to contact support');
             }
         }
         return await step.next();
@@ -100,7 +98,7 @@ class LuisDialog extends ComponentDialog {
         if (step.context.activity.text !== 'notify' && step.context.activity.text !== 'support') {
             return await step.replaceDialog('LUIS_DIALOG');
         } else {
-            console.log('Qna loop end');
+            // console.log('Qna loop end');
             return await step.endDialog('LUIS_DIALOG');
         }
     }

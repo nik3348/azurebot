@@ -22,6 +22,20 @@ class CheckStatusDialog extends ComponentDialog {
     }
 
     async validationStep(step) {
+        const mysql = require('mysql2/promise');
+        const connection = await mysql.createConnection({
+            host: process.env.MySQLHost,
+            user: process.env.MySQLUser,
+            password: process.env.MySQLPassword,
+            database: process.env.MySQLDatabase
+        });
+        const [rows] = await connection.execute('SELECT * FROM tickets WHERE ticketId = ? ', [step.result]);
+        if (rows.length !== 0) {
+            const tStatus = rows[0].ticketStatus;
+            await step.context.sendActivity(tStatus);
+        } else {
+            await step.context.sendActivity('No service request ticket found. Please try again.');
+        }
         return await step.endDialog('CHECK_STATUS_DIALOG');
     }
 

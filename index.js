@@ -36,6 +36,20 @@ adapter.onTurnError = async (context, error) => {
     await conversationState.delete(context);
 };
 
+adapter.use(async (context, next) => {
+    // hook up a handler to process any outgoing activities sent during this turn
+    context.onSendActivities(async (sendContext, activities, nextSend) => {
+        if (activities[0].type === 'message') {
+            console.log('Bot : ' + activities[0].text);
+        }
+        // pre-processing of outgoing activities
+        await nextSend();
+        // post-processing outgoing activities
+    });
+
+    await next();
+});
+
 const memoryStorage = new MemoryStorage();
 
 // Create conversation state with in-memory storage provider.

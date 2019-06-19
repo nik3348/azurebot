@@ -27,15 +27,12 @@ class Scenario6Dialog extends ComponentDialog {
 
     async phoneNoStep(step) {
         step.values.info = [];
-        console.log('Please provide the mobile number');
         const pOptions = { prompt: 'Please provide the mobile number', retryPrompt: 'Please enter a vaild phone number, make sure there are no symbols and the number does not exceed 11!' };
         return await step.prompt('MOBILE_PROMPT', pOptions);
     }
 
     async smsDateStep(step) {
-        console.log(step.result);
         step.values.info.push(step.result);
-        console.log('When was the sms sent?');
         const pOptions = { prompt: 'When was the sms sent?', retryPrompt: 'Please enter a vaild date\n Examples: \nToday, around 9 AM\n17-Apr-2019, 16:03:09 PM\n17/04/2019 4:03 PM\nYesterday around 6 in the evening' };
         return await step.prompt('DATE_TIME_PROMPT', pOptions);
     }
@@ -43,42 +40,32 @@ class Scenario6Dialog extends ComponentDialog {
     async UserIdStep(step) {
         if (step.result[0].type === 'time') {
             step.values.info.push(moment().format('YYYY-MM-DD ' + step.result[0].value));
-            console.log('Please enter the User ID');
             return await step.prompt('TEXT_PROMPT', 'Please enter the User ID');
         } else if (step.result[0].type === 'date') {
             step.values.info.push(moment().format(step.result[0].value + ' HH:mm:ss'));
-            console.log('Please enter the User ID');
             return await step.prompt('TEXT_PROMPT', 'Please enter the User ID');
         } else {
             step.values.info.push(step.result[0].value);
-            console.log('Please enter the User ID');
             return await step.prompt('TEXT_PROMPT', 'Please enter the User ID');
         }
     }
 
     async smsContentStep(step) {
-        console.log(step.result);
         step.values.info.push(step.result);
-        console.log('What was the content of the message that was sent?');
         return await step.prompt('TEXT_PROMPT', 'What was the content of the message that was sent?');
     }
 
     async mainAccIdStep(step) {
-        console.log(step.result);
         step.values.info.push(step.result);
-        console.log('Please provide the ID of the Main Account');
         return await step.prompt('TEXT_PROMPT', 'Please provide the ID of the Main Account');
     }
 
     async mainAccUrlStep(step) {
-        console.log(step.result);
         step.values.info.push(step.result);
-        console.log('Please provide the URL of the Main Account');
         return await step.prompt('TEXT_PROMPT', 'Please provide the URL of the Main Account');
     }
 
     async confirmStep(step) {
-        console.log(step.result);
         step.values.info.push(step.result);
         await step.context.sendActivity('Here is what I have collected so far:\n' +
         'Phone Number: ' + step.values.info[0] + '\n' +
@@ -88,27 +75,14 @@ class Scenario6Dialog extends ComponentDialog {
         'Main Account ID: ' + step.values.info[4] + '\n' +
         'Main Account URL: ' + step.values.info[5] + '\n');
 
-        // Logging to console
-        console.log('Here is what I have collected so far:\n' +
-        'Phone Number: ' + step.values.info[0] + '\n' +
-        'SMS Date: ' + step.values.info[1] + '\n' +
-        'User ID: ' + step.values.info[2] + '\n' +
-        'SMS Content: ' + step.values.info[3] + '\n' +
-        'Main Account ID: ' + step.values.info[4] + '\n' +
-        'Main Account URL: ' + step.values.info[5] + '\n');
-
-        console.log('Would you like me to check the database with the details provided?');
         return await step.prompt('CONFIRM_PROMPT', 'Would you like me to check the database with the details provided?', ['yes', 'no']);
     }
 
     async altMobileStep(step) {
         if (step.result) {
-            console.log(step.result);
-            console.log('Please provide the alt mobile number');
             const pOptions = { prompt: 'Please provide the alt mobile number', retryPrompt: 'Please enter a vaild phone number, make sure there are no symbols and the number does not exceed 11!' };
             return await step.prompt('MOBILE_PROMPT', pOptions);
         } else {
-            console.log(step.result);
             return await step.next('NaN');
         }
     }
@@ -116,7 +90,6 @@ class Scenario6Dialog extends ComponentDialog {
     async validationStep(step) {
         // if yes
         if (step.result) {
-            console.log(step.result);
             const mysql = require('mysql2/promise');
             const connection = await mysql.createConnection({
                 host: process.env.MySQLHost,
@@ -126,10 +99,8 @@ class Scenario6Dialog extends ComponentDialog {
             });
             let month = (moment(step.values.info[1]).month()) + 1;
             let year = (moment(step.values.info[1]).year());
-            console.log(year);
             const [rows] = await connection.execute('SELECT * FROM info WHERE phoneNo = ? AND MONTH(smsDate) = ? AND YEAR(smsDate) = ?', [step.values.info[0], month, year]);
-            console.log(rows);
-            if (rows !== undefined || rows.length !== 0) {
+            if (rows.length !== 0) {
                 await step.context.sendActivity('We were able to pull out these data for your inquiry: \n' +
                     'MTID:' + rows[0].mtid + '\n' +
                     'Client: ' + rows[0].client + '\n' +
@@ -142,9 +113,7 @@ class Scenario6Dialog extends ComponentDialog {
                 await step.context.sendActivity('Could not find the record! Please try again.');
             }
         } else {
-            console.log(step.result);
             step.context.sendActivity('Ok, you can still ask me any questions you may have or enter "support" if you`re encountering problems');
-            console.log('Ok, you can still ask me any questions you may have or enter "support" if you`re encountering problems');
             return await step.endDialog('SCENARIO6_DIALOG');
         }
     }

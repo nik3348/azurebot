@@ -41,6 +41,7 @@ class Scenario1Dialog extends ComponentDialog {
     }
 
     async contactStep(step) {
+        await step.context.sendActivity('Thank you for that, please hold on for a minute while I check.');
         if (step.result[0].type === 'time') {
             issueDate = moment().format('YYYY-MM-DD ' + step.result[0].value);
         } else if (step.result[0].type === 'date') {
@@ -59,7 +60,7 @@ class Scenario1Dialog extends ComponentDialog {
         status = rows[0].status;
         switch (status) {
         case 0:
-            await step.context.sendActivity('Status not found');
+            await step.context.sendActivity('Thank you for waiting, as checked, we didn’t find any transaction for this number on the date and time given.');
             break;
         case 1:
             await step.context.sendActivity('Upon checking, we did not see any issue for the user to receive TAC. All the messages were successfully delivered. Kindly advise user to restart his/her phone and check if he/she has blocked the TAC sender from his/her inbox phone settings.');
@@ -72,6 +73,18 @@ class Scenario1Dialog extends ComponentDialog {
             break;
         case 4:
             await step.context.sendActivity('Upon investigating based on the provided number/s, we’ve seen that the TACs have been sent out to the customer with no issues. However, user might have not received the TAC due to network coverage disruption at the area where the request was made or even an issue from users device itself. \nKindly advise user to retry by following the steps below:\n* Make sure phone is in high coverage\n* Restarted phone to refresh network\n* Make sure phone inbox is not full\n* Check if any phone applications or settings that may filter our messages \n\nAlternatively, user may swap sim to another phone and retry. Kindly let us know if the issue still persists.');
+            break;
+        case 5:
+            const [rows] = await connection.execute('SELECT id FROM tickets ORDER BY id DESC LIMIT 1');
+            let rowId = rows[0].id;
+            rowId++;
+            const curId = ('0000' + rowId).slice(-4);
+            console.log(curId);
+            const newId = 'RN-' + curId;
+            const ticketStatus = 'According to telco, this issue was due to absent subscriber. Low network/limited coverage or phone switched off are few reasons contribute to this issue.';
+            const [rows2] = await connection.execute('INSERT INTO tickets (ticketId, ticketStatus) VALUES (?, ?)', [newId, ticketStatus]);
+            console.log(rows2);
+            await step.context.sendActivity('We could not provide you with an answer right now. We are still working on an investigation together with the telco. You may follow-up using this service request number ' + newId + ' to check for updates.');
             break;
         default:
             await step.context.sendActivity('Status not found');
