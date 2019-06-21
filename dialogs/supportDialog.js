@@ -34,7 +34,7 @@ class SupportDialog extends ComponentDialog {
     }
 
     async contactStep(stepContext) {
-        if (stepContext.result){
+        if (stepContext.result) {
             let email = stepContext.values.email;
             // Create an object in which to collect the user's information within the dialog.
             await stepContext.context.sendActivity(`Sending email to support!`);
@@ -46,18 +46,17 @@ class SupportDialog extends ComponentDialog {
                 database: process.env.MySQLDatabase
             });
             const [rows] = await connection.execute('SELECT * from transcript WHERE conversationId = ? ORDER BY timestamp ASC', [stepContext.context.activity.conversation.id]);
-            await this.sendEmail(rows);
-            await stepContext.context.sendActivity(`The support team has been notified! Please be paitent as it may take some time to process your request.`);
+            await this.sendEmail(rows, email);
+            await stepContext.context.sendActivity(`The support team has been notified! Please be patient as it may take some time to process your request.`);
 
             return await stepContext.endDialog('SUPPORT_DIALOG');
-        }
-        else {
+        } else {
             await stepContext.context.sendActivity(`Support was not contacted. You may enter "support" to try again or try asking me the questions again.`);
             return await stepContext.endDialog('SUPPORT_DIALOG');
         }
     }
 
-    async sendEmail(transcript) {
+    async sendEmail(transcript, email) {
         let transcriptStr = '';
         let transporter = nodemailer.createTransport({
             host: process.env.EmailHost,
@@ -79,11 +78,10 @@ class SupportDialog extends ComponentDialog {
             to: process.env.SupportEmail,
             subject: 'Support Request', // Subject line
             text: transcriptStr, // plain text body
-            html: '<h3>User requested support </h3><br><b>Chat Transcript</b><br><p>' + transcriptStr + '</p>' // html body
+            html: '<h3>User requested support </h3><br><h4>User email : ' + email + '</h4><br><b>Chat Transcript</b><br><p>' + transcriptStr + '</p>' // html body
         });
 
         console.log('Message sent: %s', info.messageId);
-        // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
     }
 
     async emailValidator(context) {
