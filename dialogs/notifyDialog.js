@@ -19,6 +19,7 @@ class NotifyDialog extends ComponentDialog {
         // Define the company choices for the company selection prompt.
         this.notifyOptions = ['Company Events', 'Software Updates'];
         this.addDialog(new TextPrompt(TEXT_PROMPT));
+        this.addDialog(new TextPrompt('EMAIL_PROMPT', this.emailValidator));
         this.addDialog(new ChoicePrompt(CHOICE_PROMPT));
         this.addDialog(new ConfirmPrompt(CONFIRM_PROMPT));
         this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
@@ -89,7 +90,8 @@ class NotifyDialog extends ComponentDialog {
         stepContext.values.notifyInfo = new NotificationProfile();
         stepContext.values.notifyInfo.notifySelected = stepContext.result || [];
 
-        return await stepContext.prompt(TEXT_PROMPT, `What is your email?`);
+        const pOptions = { prompt: 'What is your email?', retryPrompt: 'Please make sure that your email is in the right format!\n Example : macrokiosk@gmail.com' };
+        return await stepContext.prompt('EMAIL_PROMPT', pOptions);
     }
 
     async confirmStep(stepContext) {
@@ -116,6 +118,18 @@ class NotifyDialog extends ComponentDialog {
         } else {
             await stepContext.context.sendActivity('Notification registration canceled');
             return await stepContext.endDialog('NOTIFY_DIALOG');
+        }
+    }
+
+    async emailValidator(context) {
+        let regEmail = /\S+@\S+\.\S+/;
+        if (context.recognized.succeeded) {
+            let result = context.recognized.value;
+            if (result.match(regEmail)) {
+                return true;
+            }
+        } else {
+            return false;
         }
     }
 }
