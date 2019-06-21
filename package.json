@@ -23,6 +23,7 @@
         "dotenv": "^6.1.0",
         "moment": "^2.24.0",
         "mysql2": "^1.6.5",
+        "nodemailer": "^6.2.1",
         "restify": "^7.2.3"
     },
     "devDependencies": {

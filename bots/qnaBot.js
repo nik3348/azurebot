@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 const { ActivityHandler, TurnContext } = require('botbuilder');
+const moment = require('moment');
 
 class QnABot extends ActivityHandler {
     /**
@@ -49,8 +50,15 @@ class QnABot extends ActivityHandler {
         this.onMessage(async (context, next) => {
             // this.logger.log('Running dialog with Message Activity.');
             this.addConversationReference(context.activity);
-
-            await console.log('User : ' + context.activity.text);
+            const mysql = require('mysql2/promise');
+            const connection = await mysql.createConnection({
+                host: process.env.MySQLHost,
+                user: process.env.MySQLUser,
+                password: process.env.MySQLPassword,
+                database: process.env.MySQLDatabase
+            });
+            const timestamp = moment(context.activity.localTimestamp).format('YYYY-MM-DD HH:mm:ss');
+            const [rows] = await connection.execute('INSERT INTO transcript (conversationId, user, message, timestamp) VALUES (?, ?, ?, ?)', [context.activity.conversation.id, context.activity.from.name, context.activity.text, timestamp]);
             // Run the Dialog with the new message Activity.
             await this.dialog.run(context, this.dialogState);
             await next();

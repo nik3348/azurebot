@@ -6,6 +6,7 @@
 // Import required packages
 const path = require('path');
 const restify = require('restify');
+const moment = require('moment');
 
 // Import required bot services. See https://aka.ms/bot-services to learn more about the different parts of a bot.
 const { BotFrameworkAdapter, ConversationState, MemoryStorage, UserState } = require('botbuilder');
@@ -40,7 +41,15 @@ adapter.use(async (context, next) => {
     // hook up a handler to process any outgoing activities sent during this turn
     context.onSendActivities(async (sendContext, activities, nextSend) => {
         if (activities[0].type === 'message') {
-            console.log('Bot : ' + activities[0].text);
+            const mysql = require('mysql2/promise');
+            const connection = await mysql.createConnection({
+                host: process.env.MySQLHost,
+                user: process.env.MySQLUser,
+                password: process.env.MySQLPassword,
+                database: process.env.MySQLDatabase
+            });
+            const timestamp = moment(activities[0].localTimestamp).format('YYYY-MM-DD HH:mm:ss');
+            const [rows] = await connection.execute('INSERT INTO transcript (conversationId, user, message, timestamp) VALUES (?, ?, ?, ?)', [activities[0].conversation.id, activities[0].from.name, activities[0].text, timestamp]);
         }
         // pre-processing of outgoing activities
         await nextSend();
