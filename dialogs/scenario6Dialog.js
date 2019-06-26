@@ -108,9 +108,12 @@ class Scenario6Dialog extends ComponentDialog {
                     'MSISDN: ' + rows[0].msisdn + '\n' +
                     'Broadcast Date: ' + rows[0].bDate + '\n' +
                     'Broadcast Message: ' + rows[0].bMessage);
+                connection.end();
                 return await step.endDialog('SCENARIO6_DIALOG');
             } else {
+                connection.end();
                 await step.context.sendActivity('Could not find the record! Please try again.');
+                return await step.endDialog('SCENARIO6_DIALOG');
             }
         } else {
             step.context.sendActivity('Ok, you can still ask me any questions you may have or enter "support" if you`re encountering problems');

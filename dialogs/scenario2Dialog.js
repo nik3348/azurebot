@@ -86,8 +86,10 @@ class Scenario2Dialog extends ComponentDialog {
                 const [rows] = await connection.execute('UPDATE transaction SET telco = "TELCO-B" WHERE phoneNo = ?', [step.values.info[2]]);
                 console.log(rows);
                 await step.context.sendActivity('We have now updated the number provided to TELCO-B. Kindly advise user to restart the device and retry requesting.');
+                connection.end();
                 return await step.endDialog('SCENARIO2_DIALOG');
             } else {
+                connection.end();
                 await step.context.sendActivity('Could not find the record! Please try again.');
             }
         } else {

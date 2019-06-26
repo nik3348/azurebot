@@ -124,7 +124,7 @@ class Scenario3Dialog extends ComponentDialog {
             } else {
                 await step.context.sendActivity('Could not find the record! Please try again.');
             }
-
+            connection.end();
             return await step.endDialog('SCENARIO3_DIALOG');
         } else {
             step.context.sendActivity('Ok, you can still ask me any questions you may have or enter "support" if you`re encountering problems');

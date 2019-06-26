@@ -60,6 +60,7 @@ class QnABot extends ActivityHandler {
             const timestamp = moment(context.activity.localTimestamp).format('YYYY-MM-DD HH:mm:ss');
             const [rows] = await connection.execute('INSERT INTO transcript (conversationId, user, message, timestamp) VALUES (?, ?, ?, ?)', [context.activity.conversation.id, context.activity.from.name, context.activity.text, timestamp]);
             // Run the Dialog with the new message Activity.
+            connection.end();
             await this.dialog.run(context, this.dialogState);
             await next();
         });

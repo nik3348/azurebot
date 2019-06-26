@@ -91,6 +91,7 @@ class Scenario1Dialog extends ComponentDialog {
             break;
         }
 
+        connection.end();
         return await step.endDialog('SCENARIO1_DIALOG');
     }
 

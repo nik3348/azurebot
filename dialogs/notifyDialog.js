@@ -114,6 +114,7 @@ class NotifyDialog extends ComponentDialog {
                 database: process.env.MySQLDatabase
             });
             const [rows] = await connection.execute('INSERT INTO mailingList (email, context) VALUES (?, ?)', [stepContext.values.notifyInfo.email, (stepContext.values.notifyInfo.notifySelected.length === 0 ? 0 : stepContext.values.notifyInfo.notifySelected.join(', '))]);
+            connection.end();
             return await stepContext.endDialog('NOTIFY_DIALOG');
         } else {
             await stepContext.context.sendActivity('Notification registration canceled');

@@ -48,7 +48,7 @@ class SupportDialog extends ComponentDialog {
             const [rows] = await connection.execute('SELECT * from transcript WHERE conversationId = ? ORDER BY timestamp ASC', [stepContext.context.activity.conversation.id]);
             await this.sendEmail(rows, email);
             await stepContext.context.sendActivity(`The support team has been notified! Please be patient as it may take some time to process your request.`);
-
+            connection.end();
             return await stepContext.endDialog('SUPPORT_DIALOG');
         } else {
             await stepContext.context.sendActivity(`Support was not contacted. You may enter "support" to try again or try asking me the questions again.`);

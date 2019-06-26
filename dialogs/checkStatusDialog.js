@@ -36,6 +36,7 @@ class CheckStatusDialog extends ComponentDialog {
         } else {
             await step.context.sendActivity('No service request ticket found. Please try again.');
         }
+        connection.end();
         return await step.endDialog('CHECK_STATUS_DIALOG');
     }
 

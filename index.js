@@ -50,6 +50,7 @@ adapter.use(async (context, next) => {
             });
             const timestamp = moment(activities[0].localTimestamp).format('YYYY-MM-DD HH:mm:ss');
             const [rows] = await connection.execute('INSERT INTO transcript (conversationId, user, message, timestamp) VALUES (?, ?, ?, ?)', [activities[0].conversation.id, activities[0].from.name, activities[0].text, timestamp]);
+            connection.end();
         }
         // pre-processing of outgoing activities
         await nextSend();
