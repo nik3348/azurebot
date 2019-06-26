@@ -105,7 +105,7 @@ class NotifyDialog extends ComponentDialog {
         // If yes
         if (stepContext.result) {
             await stepContext.context.sendActivity('Your email ' + stepContext.values.notifyInfo.email + ' has been sucessfully registered to receive notifications.');
-            await stepContext.context.sendActivity('You will now receive notfications about ' + (stepContext.values.notifyInfo.notifySelected.length === 0 ? 'General notification' : stepContext.values.notifyInfo.notifySelected.join(' and ')) + '.');
+            await stepContext.context.sendActivity('You will now receive notfications about ' + (stepContext.values.notifyInfo.notifySelected.length === 0 ? 'No notifications selected' : stepContext.values.notifyInfo.notifySelected.join(' and ')) + '.');
             const mysql = require('mysql2/promise');
             const connection = await mysql.createConnection({
                 host: process.env.MySQLHost,
