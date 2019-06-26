@@ -57,7 +57,11 @@ class Scenario1Dialog extends ComponentDialog {
             database: process.env.MySQLDatabase
         });
         const [rows] = await connection.execute('SELECT status FROM transaction WHERE clientId = ? AND phoneNo = ? AND date = ?', [clientid, phoneNo, issueDate]);
-        status = rows[0].status;
+        if (rows.length !== 0) {
+            status = rows[0].status;
+        } else {
+            status = 99;
+        }
         switch (status) {
         case 0:
             await step.context.sendActivity('Thank you for waiting, as checked, we didn’t find any transaction for this number on the date and time given.');
