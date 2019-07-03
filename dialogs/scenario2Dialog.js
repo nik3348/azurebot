@@ -83,7 +83,7 @@ class Scenario2Dialog extends ComponentDialog {
             });
             const [rows] = await connection.execute('SELECT * FROM transaction WHERE phoneNo = ?', [step.values.info[1]]);
             if (rows.length !== 0) {
-                const [rows] = await connection.execute('UPDATE transaction SET telco = "TELCO-B" WHERE phoneNo = ?', [step.values.info[2]]);
+                const [rows] = await connection.execute('UPDATE transaction SET telco = "TELCO-B" WHERE phoneNo = ?', [step.values.info[1]]);
                 console.log(rows);
                 await step.context.sendActivity('We have now updated the number provided to TELCO-B. Kindly advise user to restart the device and retry requesting.');
                 connection.end();
